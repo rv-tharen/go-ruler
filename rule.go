@@ -65,7 +65,7 @@ func (rf *RulerRule) Matches(value interface{}) *RulerRule {
 	return rf.compare(matches, value)
 }
 
-// adds a not matches condition (ncontains, in the way this thinks of it)
+// NotMatches adds a not matches condition (ncontains, in the way this thinks of it)
 func (rf *RulerRule) NotMatches(value interface{}) *RulerRule {
 	return rf.compare(ncontains, value)
 }

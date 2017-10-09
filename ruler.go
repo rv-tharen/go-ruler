@@ -29,6 +29,7 @@ const (
 	ncontains = iota
 )
 
+// Ruler wraps a slice of rules
 type Ruler struct {
 	rules []*Rule
 }
@@ -46,9 +47,9 @@ func NewRuler(rules ...*Rule) *Ruler {
 	return &Ruler{}
 }
 
-// NewRulerWithJson returns a new ruler with filters parsed from JSON data
+// NewRulerWithJSON returns a new ruler with filters parsed from JSON data
 // expects JSON as a slice of bytes and will parse your JSON for you!
-func NewRulerWithJson(jsonstr []byte) (*Ruler, error) {
+func NewRulerWithJSON(jsonstr []byte) (*Ruler, error) {
 	var rules []*Rule
 
 	err := json.Unmarshal(jsonstr, &rules)

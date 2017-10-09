@@ -246,7 +246,7 @@ func BenchmarkPluckShallow(b *testing.B) {
 		},
 	}
 
-	for i := 0; i < b.N; i += 1 {
+	for i := 0; i < b.N; i++ {
 		r := pluck(o, "hey.there")
 		if r != 4 {
 			b.Errorf("fail bench, val was %s", r)
@@ -273,7 +273,7 @@ func BenchmarkPluckDeep(b *testing.B) {
 		},
 	}
 
-	for i := 0; i < b.N; i += 1 {
+	for i := 0; i < b.N; i++ {
 		r := pluck(o, "test.thing.here.today.is.awesome.with.thestuff")
 		if r != "no dice" {
 			b.Errorf("fail bench, val was %s", r)
@@ -281,13 +281,13 @@ func BenchmarkPluckDeep(b *testing.B) {
 	}
 }
 
-func TestNewRulerWithJson(t *testing.T) {
-	theJson := []byte(`[
+func TestNewRulerWithJSON(t *testing.T) {
+	theJSON := []byte(`[
 			{"comparator": "eq", "path": "name", "value": "Thomas"}
 		]
 	`)
 
-	r, err := NewRulerWithJson(theJson)
+	r, err := NewRulerWithJSON(theJSON)
 	if err != nil {
 		t.Errorf("Error getting new ruler w/json: %s", err)
 	}
@@ -301,8 +301,8 @@ func TestNewRulerWithJson(t *testing.T) {
 	}
 }
 
-func BenchmarkNewRulerWithJson(b *testing.B) {
-	theJson := []byte(`[
+func BenchmarkNewRulerWithJSON(b *testing.B) {
+	theJSON := []byte(`[
 			{"comparator": "eq", "path": "name", "value": "Thomas"}
 		]
 	`)
@@ -310,8 +310,8 @@ func BenchmarkNewRulerWithJson(b *testing.B) {
 		"name": "Thomas",
 	}
 
-	for i := 0; i < b.N; i += 1 {
-		r, err := NewRulerWithJson(theJson)
+	for i := 0; i < b.N; i++ {
+		r, err := NewRulerWithJSON(theJSON)
 		if err != nil {
 			b.Errorf("Error getting new ruler w/json: %s", err)
 		}
@@ -335,8 +335,8 @@ func BenchmarkNewRulerWithRulesSimple(b *testing.B) {
 		"name": "Bob",
 	}
 
-	for i := 0; i < b.N; i += 1 {
-		r := NewRuler(filters)
+	for i := 0; i < b.N; i++ {
+		r := NewRuler(filters...)
 
 		if !r.Test(data) {
 			b.Error("NewRuler didn't do something properly!")
@@ -423,8 +423,8 @@ func BenchmarkNewRulerWithRulesTen(b *testing.B) {
 		},
 	}
 
-	for i := 0; i < b.N; i += 1 {
-		r := NewRuler(filters)
+	for i := 0; i < b.N; i++ {
+		r := NewRuler(filters...)
 
 		if !r.Test(data) {
 			b.Error("NewRuler didn't do something properly!")

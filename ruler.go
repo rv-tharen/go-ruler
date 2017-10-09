@@ -2,10 +2,11 @@ package ruler
 
 import (
 	"encoding/json"
-	"github.com/tj/go-debug"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/tj/go-debug"
 )
 
 var ruleDebug = debug.Debug("ruler:rule")
@@ -32,10 +33,10 @@ type Ruler struct {
 	rules []*Rule
 }
 
-// creates a new Ruler for you
+// NewRuler creates a new Ruler for you
 // optionally accepts a pointer to a slice of filters
 // if you have filters that you want to start with
-func NewRuler(rules []*Rule) *Ruler {
+func NewRuler(rules ...*Rule) *Ruler {
 	if rules != nil {
 		return &Ruler{
 			rules,
@@ -45,7 +46,7 @@ func NewRuler(rules []*Rule) *Ruler {
 	return &Ruler{}
 }
 
-// returns a new ruler with filters parsed from JSON data
+// NewRulerWithJson returns a new ruler with filters parsed from JSON data
 // expects JSON as a slice of bytes and will parse your JSON for you!
 func NewRulerWithJson(jsonstr []byte) (*Ruler, error) {
 	var rules []*Rule
@@ -55,10 +56,10 @@ func NewRulerWithJson(jsonstr []byte) (*Ruler, error) {
 		return nil, err
 	}
 
-	return NewRuler(rules), nil
+	return NewRuler(rules...), nil
 }
 
-// adds a new rule for the property at `path`
+// Rule adds a new rule for the property at `path`
 // returns a RulerFilter that you can use to add conditions
 // and more filters
 func (r *Ruler) Rule(path string) *RulerRule {
@@ -76,7 +77,7 @@ func (r *Ruler) Rule(path string) *RulerRule {
 	}
 }
 
-// tests all the rules (i.e. filters) in your set of rules,
+// Test tests all the rules (i.e. filters) in your set of rules,
 // given a map that looks like a JSON object
 // (map[string]interface{})
 func (r *Ruler) Test(o map[string]interface{}) bool {
@@ -110,7 +111,7 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 	return true
 }
 
-// compares real v. actual values
+// compare compares real v. actual values
 func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 	ruleDebug("beginning comparison")
 	expected := f.Value
@@ -158,7 +159,7 @@ func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 	}
 }
 
-// runs equality comparison
+// inequality runs equality comparison
 // separated in a different function because
 // we need to do another type assertion here
 // and some other acrobatics
@@ -260,13 +261,15 @@ func (r *Ruler) regexp(actual, expected interface{}) bool {
 // given a map, pull a property from it at some deeply nested depth
 // this reimplements (most of) JS `pluck` in go: https://github.com/gjohnson/pluck
 func pluck(o map[string]interface{}, path string) interface{} {
-	// support dots for now ebcause thats all we need
+	// support dots for now because that's all we need
 	parts := strings.Split(path, ".")
 
 	if len(parts) == 1 && o[parts[0]] != nil {
 		// if there is only one part, just return that property value
 		return o[parts[0]]
-	} else if len(parts) > 1 && o[parts[0]] != nil {
+	}
+
+	if len(parts) > 1 && o[parts[0]] != nil {
 		var prev map[string]interface{}
 		var ok bool
 		if prev, ok = o[parts[0]].(map[string]interface{}); !ok {
@@ -274,7 +277,7 @@ func pluck(o map[string]interface{}, path string) interface{} {
 			return nil
 		}
 
-		for i := 1; i < len(parts)-1; i += 1 {
+		for i := 1; i < len(parts)-1; i++ {
 			// we need to check the existence of another
 			// map[string]interface for every property along the way
 			cp := parts[i]
@@ -291,8 +294,6 @@ func pluck(o map[string]interface{}, path string) interface{} {
 
 		if prev[parts[len(parts)-1]] != nil {
 			return prev[parts[len(parts)-1]]
-		} else {
-			return nil
 		}
 	}
 

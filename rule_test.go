@@ -4,7 +4,7 @@ import "testing"
 
 func TestNewFilterWhenComparatorExists(t *testing.T) {
 	rule := &Rule{
-		Comparator: "eq",
+		Comparator: eq,
 		Path:       "name",
 		Value:      "Bob",
 	}

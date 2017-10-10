@@ -15,7 +15,7 @@ This struct is exported here so that you can include it in your own JSON encodin
 but go-ruler has a facility to help decode your rules from JSON into its own structs.
 */
 type Rule struct {
-	Comparator string      `json:"comparator"`
+	Comparator Comparator  `json:"comparator"`
 	Path       string      `json:"path"`
 	Value      interface{} `json:"value"`
 }
@@ -77,31 +77,9 @@ func (rf *RulerRule) End() *Ruler {
 }
 
 // compare will either create a new ruler filter and add its filter
-func (rf *RulerRule) compare(comp int, value interface{}) *RulerRule {
-	var comparator string
-	switch comp {
-	case eq:
-		comparator = "eq"
-	case neq:
-		comparator = "neq"
-	case lt:
-		comparator = "lt"
-	case lte:
-		comparator = "lte"
-	case gt:
-		comparator = "gt"
-	case gte:
-		comparator = "gte"
-	case contains:
-		comparator = "contains"
-	case matches:
-		comparator = "matches"
-	case ncontains:
-		comparator = "ncontains"
-	}
-
+func (rf *RulerRule) compare(comparator Comparator, value interface{}) *RulerRule {
 	// if this thing has a comparator already, we need to make a new ruler filter
-	if rf.Comparator != "" {
+	if rf.Comparator != none {
 		rf = &RulerRule{
 			rf.Ruler,
 			&Rule{
@@ -113,7 +91,7 @@ func (rf *RulerRule) compare(comp int, value interface{}) *RulerRule {
 		// attach the new filter to the ruler
 		rf.Ruler.rules = append(rf.Ruler.rules, rf.Rule)
 	} else {
-		//if there is no comparator, we can just set things on the current filter
+		// if there is no comparator, we can just set things on the current filter
 		rf.Comparator = comparator
 		rf.Value = value
 	}

@@ -11,22 +11,22 @@ import (
 
 var ruleDebug = debug.Debug("ruler:rule")
 
-// we'll use these values
-// to avoid passing strings to our
-// special comparison func for these comparators
+type Comparator string
+
 const (
-	eq        = iota
-	neq       = iota
-	gt        = iota
-	gte       = iota
-	lt        = iota
-	lte       = iota
-	exists    = iota
-	nexists   = iota
-	regex     = iota
-	matches   = iota
-	contains  = iota
-	ncontains = iota
+	none      = Comparator("")
+	eq        = Comparator("eq")
+	neq       = Comparator("neq")
+	gt        = Comparator("gt")
+	gte       = Comparator("gte")
+	lt        = Comparator("lt")
+	lte       = Comparator("lte")
+	exists    = Comparator("exists")
+	nexists   = Comparator("nexists")
+	regex     = Comparator("regex")
+	matches   = Comparator("matches")
+	contains  = Comparator("contains")
+	ncontains = Comparator("ncontains")
 )
 
 // Ruler wraps a slice of rules
@@ -65,7 +65,7 @@ func NewRulerWithJSON(jsonstr []byte) (*Ruler, error) {
 // and more filters
 func (r *Ruler) Rule(path string) *RulerRule {
 	rule := &Rule{
-		"",
+		none,
 		path,
 		nil,
 	}
@@ -97,7 +97,7 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 			if !r.compare(f, val) {
 				return false
 			}
-		} else if val == nil && (f.Comparator == "exists" || f.Comparator == "nexists") {
+		} else if val == nil && (f.Comparator == exists || f.Comparator == nexists) {
 			// either one of these can be done
 			return r.compare(f, val)
 		} else {
@@ -106,7 +106,6 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 			// and the comparator isn't exists/nexists, this fails
 			return false
 		}
-
 	}
 
 	return true
@@ -117,39 +116,39 @@ func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 	ruleDebug("beginning comparison")
 	expected := f.Value
 	switch f.Comparator {
-	case "eq":
+	case eq:
 		return actual == expected
 
-	case "neq":
+	case neq:
 		return actual != expected
 
-	case "gt":
+	case gt:
 		return r.inequality(gt, actual, expected)
 
-	case "gte":
+	case gte:
 		return r.inequality(gte, actual, expected)
 
-	case "lt":
+	case lt:
 		return r.inequality(lt, actual, expected)
 
-	case "lte":
+	case lte:
 		return r.inequality(lte, actual, expected)
 
-	case "exists":
+	case exists:
 		// not sure this makes complete sense
 		return actual != nil
 
-	case "nexists":
+	case nexists:
 		return actual == nil
 
-	case "regex":
+	case regex:
 		fallthrough
-	case "contains":
+	case contains:
 		fallthrough
-	case "matches":
+	case matches:
 		return r.regexp(actual, expected)
 
-	case "ncontains":
+	case ncontains:
 		return !r.regexp(actual, expected)
 	default:
 		//should probably return an error or something
@@ -164,7 +163,7 @@ func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 // separated in a different function because
 // we need to do another type assertion here
 // and some other acrobatics
-func (r *Ruler) inequality(op int, actual, expected interface{}) bool {
+func (r *Ruler) inequality(op Comparator, actual, expected interface{}) bool {
 	// need some variables for these deals
 	ruleDebug("entered inequality comparison")
 	var cmpStr [2]string
@@ -184,6 +183,7 @@ func (r *Ruler) inequality(op int, actual, expected interface{}) bool {
 			cmpUint[idx] = t
 		case uint:
 			cmpUint[idx] = uint64(t)
+
 		case int8:
 			cmpInt[idx] = int64(t)
 		case int16:
@@ -194,12 +194,15 @@ func (r *Ruler) inequality(op int, actual, expected interface{}) bool {
 			cmpInt[idx] = t
 		case int:
 			cmpInt[idx] = int64(t)
+
 		case float32:
 			cmpFloat[idx] = float64(t)
 		case float64:
 			cmpFloat[idx] = t
+
 		case string:
 			cmpStr[idx] = t
+
 		default:
 			ruleDebug("invalid type for inequality comparison")
 			return false
